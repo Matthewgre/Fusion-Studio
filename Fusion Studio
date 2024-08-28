@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fusion Studio - E-Commerce</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Fusion Studio</h1>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Shop</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="product-list">
+            <!-- Prodotti verranno inseriti qui dinamicamente -->
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Fusion Studio. All rights reserved.</p>
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.product-list {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 20px;
+}
+
+.product-list .product {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin: 15px;
+    padding: 10px;
+    width: 200px;
+    text-align: center;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('https://fusion-studio.onrender.com/products')  // Modifica l'URL se necessario
+        .then(response => response.json())
+        .then(products => {
+            const productList = document.querySelector('.product-list');
+            products.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.classList.add('product');
+                productDiv.innerHTML = `
+                    <h2>${product.name}</h2>
+                    <p>${product.description}</p>
+                    <p><strong>€${product.price.toFixed(2)}</strong></p>
+                `;
+                productList.appendChild(productDiv);
+            });
+        })
+        .catch(error => console.error('Errore:', error));
+});
+const express = require('express');
+const app = express();
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+
+// Creazione e connessione al database
+const db = new sqlite3.Database(':memory:');
+
+// Creazione delle tabelle di esempio
+db.serialize(() => {
+    db.run("CREATE TABLE products (id INT, name TEXT, price REAL, description TEXT)");
+    db.run("INSERT INTO products (id, name, price, description) VALUES (1, 'T-shirt', 19.99, 'T-shirt con logo Fusion Studio')");
+    db.run("INSERT INTO products (id, name, price, description) VALUES (2, 'Felpa', 39.99, 'Felpa con cappuccio Fusion Studio')");
+    db.run("INSERT INTO products (id, name, price, description) VALUES (3, 'Cappello', 14.99, 'Cappello Fusion Studio')");
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/products', (req, res) => {
+    db.all("SELECT * FROM products", [], (err, rows) => {
+        if (err) {
+            throw err;
+        }
+        res.json(rows);
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+/FusionStudio
+    /public
+        index.html
+        styles.css
+        app.js
+    server.js
